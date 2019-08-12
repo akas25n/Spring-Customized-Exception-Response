@@ -1,6 +1,7 @@
 package com.user.Controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,40 +13,37 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.user.Exception.UserNotFoundException;
 import com.user.Model.User;
-import com.user.Service.UserService;
+import com.user.Repository.UserRepository;
 
 @RestController
 public class UserController {	
 
 	@Autowired
-	private UserService userService;
+	private UserRepository userRepository;
 	
 	@GetMapping("/users")
 	public List<User> retrieveAllUsers(){
-		return userService.findall();
+		List<User> user =  userRepository.findAll();
+		return user;
 	}
 	
 	@GetMapping("/users/{id}")
 	public User findSinleUser(@PathVariable int id) {
-		User user = userService.findOne(id); 
-		if (user==null) {
+		Optional<User> user = userRepository.findById(id);
+		if (!user.isPresent()) {
 			throw new UserNotFoundException("id-" + id);
 		}
-		return user;
+		return user.get();
 	}
 	
 	@PostMapping("/users")
 	public void createUser(@RequestBody User user) {	
-		userService.save(user);
+		userRepository.save(user);
 	}
 	
 	@DeleteMapping("/users/{id}")
 	public void deleteUser(@PathVariable int id) {
-		User user = userService.deleteById(id);
-		
-		if (user==null) {
-			throw new UserNotFoundException("id-" + id);
-		}
+		userRepository.deleteById(id);
 	}
 
 }
